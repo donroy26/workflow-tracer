@@ -1,0 +1,233 @@
+/* ============================================================
+   Don's Bookshelf — Colors & Type
+   Cream-grounded neutrals + pastel "book spine" accents.
+   ============================================================ */
+
+/* -- Webfonts (Google Fonts substitutes; flagged in README) ----- */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ---------- Brand palette (the 5 book spines + shelf) ------- */
+  --spine-orange:  #fdc689;
+  --spine-blue:    #6dcff6;
+  --spine-green:   #a3d39c;
+  --spine-salmon:  #f69679;
+  --spine-yellow:  #fff799;
+  --shelf-brown:   #754c24;
+
+  /* Deeper accent variants (for text & small fills on cream) */
+  --orange-deep:   #c97a2b;
+  --blue-deep:     #1f7fa8;
+  --green-deep:    #4f8a48;
+  --salmon-deep:   #c75038;
+  --yellow-deep:   #b58a14;
+  --brown-deep:    #3f2912;
+
+  /* ---------- Neutrals (cream-grounded) ---------------------- */
+  --cream-50:  #fdfaf2;   /* lightest paper */
+  --cream-100: #f8f1e1;   /* page background — default site bg */
+  --cream-200: #efe5cf;   /* card/elevated surface on cream */
+  --cream-300: #e2d4b6;   /* hairline borders, dividers */
+  --cream-400: #c9b794;   /* muted decorative */
+
+  --ink-900: #2a221c;     /* primary text (warm near-black) */
+  --ink-700: #4a3f36;     /* strong body */
+  --ink-500: #6e6056;     /* secondary text */
+  --ink-300: #9b8d80;     /* tertiary / metadata */
+
+  /* ---------- Semantic surface tokens ------------------------ */
+  --bg:           var(--cream-100);
+  --bg-elevated:  var(--cream-50);
+  --bg-sunken:    var(--cream-200);
+  --surface-card: var(--cream-50);
+
+  --fg-1: var(--ink-900);   /* primary */
+  --fg-2: var(--ink-700);   /* secondary */
+  --fg-3: var(--ink-500);   /* muted / meta */
+  --fg-4: var(--ink-300);   /* placeholder, decorative */
+
+  --border:        var(--cream-300);
+  --border-strong: var(--cream-400);
+
+  --accent:        var(--blue-deep);   /* default link / cta — sky blue from logo */
+  --accent-hover:  #15607f;           /* darker blue for hover */
+  --accent-tint:   rgba(31, 127, 168, 0.12); /* focus ring / soft fill */
+
+  /* Status (kept warm to match palette) */
+  --success: var(--green-deep);
+  --info:    var(--blue-deep);
+  --warning: var(--orange-deep);
+  --danger:  var(--salmon-deep);
+
+  /* ---------- Typography stacks ------------------------------ */
+  --font-display: "Lora", Georgia, serif;
+  --font-serif:   "Lora", Georgia, serif;
+  --font-sans:    "DM Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---------- Type scale (modular, gentle) ------------------- */
+  --fs-xs:   12px;
+  --fs-sm:   14px;
+  --fs-base: 17px;   /* body — slightly larger for reading */
+  --fs-md:   19px;
+  --fs-lg:   22px;
+  --fs-xl:   28px;
+  --fs-2xl:  36px;
+  --fs-3xl:  48px;
+  --fs-4xl:  64px;
+
+  --lh-tight: 1.12;
+  --lh-snug:  1.3;
+  --lh-body:  1.6;
+  --lh-loose: 1.75;
+
+  /* ---------- Spacing (4px base) ----------------------------- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  24px;
+  --s-6:  32px;
+  --s-7:  48px;
+  --s-8:  64px;
+  --s-9:  96px;
+
+  /* ---------- Radii (gentle, paper-like) --------------------- */
+  --r-xs:  3px;
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  14px;
+  --r-xl:  20px;
+  --r-pill: 999px;
+
+  /* ---------- Shadows (soft, warm-tinted) -------------------- */
+  --shadow-xs: 0 1px 0 rgba(58, 38, 18, 0.06);
+  --shadow-sm: 0 1px 2px rgba(58, 38, 18, 0.06), 0 1px 1px rgba(58, 38, 18, 0.04);
+  --shadow-md: 0 4px 12px rgba(58, 38, 18, 0.08), 0 1px 2px rgba(58, 38, 18, 0.04);
+  --shadow-lg: 0 12px 28px rgba(58, 38, 18, 0.10), 0 2px 4px rgba(58, 38, 18, 0.05);
+
+  /* ---------- Motion ----------------------------------------- */
+  --ease-out:   cubic-bezier(.22, .61, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --dur-fast:   140ms;
+  --dur-med:    220ms;
+  --dur-slow:   400ms;
+}
+
+/* ============================================================
+   Semantic element styles
+   ============================================================ */
+
+html, body {
+  background: var(--bg);
+  color: var(--fg-1);
+  font-family: var(--font-serif);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings — Newsreader, slightly editorial */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--fg-1);
+  line-height: var(--lh-tight);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin: 0;
+}
+h1 { font-size: var(--fs-4xl); font-weight: 600; letter-spacing: -0.02em; }
+h2 { font-size: var(--fs-3xl); font-weight: 500; }
+h3 { font-size: var(--fs-2xl); font-weight: 500; }
+h4 { font-size: var(--fs-xl); font-weight: 600; }
+h5 { font-size: var(--fs-lg); font-weight: 600; }
+h6 { font-size: var(--fs-md); font-weight: 600; text-transform: none; }
+
+/* Body copy */
+p {
+  font-family: var(--font-serif);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  color: var(--fg-2);
+  text-wrap: pretty;
+  margin: 0;
+}
+.lead {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+  color: var(--fg-1);
+  font-style: italic;
+  font-weight: 400;
+}
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--fg-3);
+  font-weight: 600;
+}
+.meta {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  color: var(--fg-3);
+}
+
+/* UI / sans labels */
+.ui, button, input, select, textarea, label, .nav, .badge {
+  font-family: var(--font-sans);
+}
+
+/* Links */
+a {
+  color: var(--accent);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--cream-400);
+  text-underline-offset: 3px;
+  transition: color var(--dur-fast) var(--ease-out),
+              text-decoration-color var(--dur-fast) var(--ease-out);
+}
+a:hover {
+  color: var(--accent-hover);
+  text-decoration-color: var(--accent-hover);
+}
+
+/* Inline code & blockquote */
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+code {
+  background: var(--cream-200);
+  color: var(--accent);
+  padding: 0.1em 0.35em;
+  border-radius: var(--r-xs);
+}
+pre {
+  background: var(--cream-200);
+  color: var(--ink-900);
+  padding: var(--s-4) var(--s-5);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  overflow: auto;
+  line-height: 1.55;
+}
+blockquote {
+  border-left: 3px solid var(--accent);
+  padding: var(--s-2) 0 var(--s-2) var(--s-5);
+  margin: 0;
+  font-style: italic;
+  color: var(--fg-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: var(--s-6) 0;
+}

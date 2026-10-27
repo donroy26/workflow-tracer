@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 96" width="200" height="96" role="img" aria-label="Don's Bookshelf">
+
+  <rect x="20" y="14" width="22" height="68" rx="3" fill="#fdc689"></rect>
+  <rect x="46" y="18" width="22" height="64" rx="3" fill="#6dcff6"></rect>
+  <rect x="72" y="22" width="22" height="60" rx="3" fill="#a3d39c"></rect>
+  <rect x="98" y="14" width="22" height="68" rx="3" fill="#f69679"></rect>
+
+  <g transform="rotate(-14 137 82)">
+    <rect x="137" y="12" width="22" height="70" rx="3" fill="#f5c842"></rect>
+  </g>
+
+  <rect x="0" y="82" width="192" height="5" rx="1.5" fill="#754c24"></rect>
+</svg>
