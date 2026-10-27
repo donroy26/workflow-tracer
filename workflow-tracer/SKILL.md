@@ -69,6 +69,7 @@ The tree's colours come from file names (`CONTEXT.md` is a contract, `docs/` is 
 - A path that does not resolve is still logged (`exists: false`); the check fails and the node is marked missing.
 - The budget check counts L2–L4 only, since routing files are read on every task; the total is shown beside it.
 - Tokens are bytes/4. Good enough to see a budget blow, not a bill.
+- A partial read (`--lines A-B`) is charged for the slice. The tree node still shows the whole file's weight; the step shows the slice and the range. In a codebase the unit of work is a symbol inside a file, so this is the only honest way to score a read of one function in a 5,000-line module.
 
 ## Reading the dashboard
 

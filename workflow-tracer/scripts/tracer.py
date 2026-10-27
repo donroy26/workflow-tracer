@@ -169,7 +169,8 @@ def append(args, step):
     step["at"] = time.strftime("%H:%M:%S")
     with (out / "trace.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps(step) + "\n")
-    print(f"{step['i']:>2}. {step['kind']:<4} {step.get('path') or step.get('what')}  [{step.get('layer', '-')}] ~{step.get('tokens', 0):,} tok")
+    rng = f" (lines {step['lines'][0]}-{step['lines'][1]} of ~{step['bytes'] // 4:,})" if step.get("lines") else ""
+    print(f"{step['i']:>2}. {step['kind']:<4} {step.get('path') or step.get('what')}  [{step.get('layer', '-')}] ~{step.get('tokens', 0):,} tok{rng}")
 
 
 def rel_to_root(args, p: str) -> str:
@@ -187,9 +188,16 @@ def cmd_read(args):
     rel, path = rel_to_root(args, args.path)
     exists = path.exists() and path.is_file()
     size = path.stat().st_size if exists else 0
+    step = {"kind": "named" if args.named else "read", "path": rel, "layer": args.layer, "why": args.why, "via": args.via,
+            "exists": exists, "bytes": size, "tokens": 0 if args.named else tokens_of(path, size)}
+    # --lines A-B: the walker opened a slice, so charge the slice. The whole-file size stays in "bytes" and on the
+    # tree node; the step carries what was loaded. A 95k-token module read at one function is not a 95k read.
+    if args.lines and exists and not args.named:
+        a, b = (int(x) for x in args.lines.split("-"))
+        chunk = b"".join(path.read_bytes().splitlines(keepends=True)[a - 1:b])
+        step.update({"lines": [a, b], "loaded": len(chunk), "tokens": tokens_of(path, len(chunk))})
     # --named: the contract names it as an input and the walker checked it exists, but did not open it. No tokens.
-    append(args, {"kind": "named" if args.named else "read", "path": rel, "layer": args.layer, "why": args.why, "via": args.via,
-                  "exists": exists, "bytes": size, "tokens": 0 if args.named else tokens_of(path, size)})
+    append(args, step)
 
 
 def cmd_scan(args):
@@ -250,7 +258,8 @@ def main():
     r = sub.add_parser("read"); r.add_argument("path"); r.add_argument("-d", "--dir", required=True)
     r.add_argument("--layer", default="L4", choices=["L0", "L1", "L2", "L3", "L4"])
     r.add_argument("--why", required=True); r.add_argument("--via", default="")
-    r.add_argument("--named", action="store_true", help="named as an input and checked, not opened"); r.set_defaults(fn=cmd_read)
+    r.add_argument("--named", action="store_true", help="named as an input and checked, not opened")
+    r.add_argument("--lines", help="A-B: only these lines were read; tokens are charged for the slice"); r.set_defaults(fn=cmd_read)
     s = sub.add_parser("scan"); s.add_argument("pattern"); s.add_argument("-d", "--dir", required=True)
     s.add_argument("--why", required=True); s.set_defaults(fn=cmd_scan)
     m = sub.add_parser("miss"); m.add_argument("what"); m.add_argument("-d", "--dir", required=True)

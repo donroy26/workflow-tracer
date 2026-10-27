@@ -25,7 +25,7 @@ python -I "<SK>/scripts/tracer.py" miss "<what you looked for>" -d "<DIR>" --why
 python -I "<SK>/scripts/tracer.py" scan "<the glob or grep you ran>" -d "<DIR>" --why "<why the catalog did not route>"
 ```
 
-A `Glob` or `Grep` is a scan. A folder listing is not logged. A file you open twice is logged twice.
+A `Glob` or `Grep` is a scan. A folder listing is not logged. A file you open twice is logged twice. If you open only part of a file (a line range, a slice around one symbol), say so with `--lines A-B` on the same command: the trace is charged for the slice, not the file. Log the range you actually read, not the range you meant to.
 
 **The route.** Open the entry file at the root. Find the line or table row that matches the task and follow it. Keep following until you reach the file that tells you what to do for this task; then read the inputs it names: every-run reference material in full, and the files the task would act on. Stop at the point where the work would start.
 

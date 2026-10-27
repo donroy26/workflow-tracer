@@ -236,7 +236,10 @@ svg { display: block; font-family: var(--body) }
   const SHORT = ['Route', 'Budget', 'Catalog', 'Paths'];
   $('checks').innerHTML = (trace.checks || []).map((c, i) => `<button type="button" class="chk ${c.pass ? 'pass' : 'fail'}" data-i="${i}" title="${c.name}: ${c.note}. Click for the evidence."><b></b><span class="long">${c.name}</span><span class="short">${SHORT[i] || c.name}</span><small>${c.note}</small></button>`).join('');
   // Click a check for its rule and the steps it was judged on. The rules mirror cmd_done in tracer.py.
-  const row = s => `<li><code>${esc(s.path)}</code> · ${s.layer}${s.tokens ? ' · ~' + fmt(s.tokens) + ' tok' : ''}${s.kind === 'named' ? ' · named, not opened' : ''}</li>`;
+  const whole = s => fmt(Math.floor((s.bytes || 0) / 4)); // the file's full weight; a read shows loaded / whole so a slice is visible as a fraction
+  const used = s => `~${fmt(s.tokens)} / ${whole(s)}`;
+  const slice = s => s.lines ? ` (lines ${s.lines[0]}–${s.lines[1]})` : '';
+  const row = s => `<li><code>${esc(s.path)}</code> · ${s.layer}${s.tokens ? ' · ' + used(s) + ' tok' + slice(s) : ''}${s.kind === 'named' ? ' · named, not opened' : ''}</li>`;
   const WHY = [
     () => { const l2 = trace.totals?.l2_at; const upTo = l2 ? reads.filter(s => s.i <= l2) : reads;
       return `<p>Rule: the entry file plus at most two more reads must reach the first file that says what to do for this task (the L2 contract). More hops means the routing is doing the work the folders should.</p><p>Measured: ${l2 ? `the L2 contract was read ${l2}; ${l2 <= 3 ? 'within' : 'past'} the limit of 3.` : 'no read was assigned L2, so the task has no control point.'}</p><ol>${upTo.map(row).join('')}</ol>`; },
@@ -264,6 +267,7 @@ svg { display: block; font-family: var(--body) }
   reads.concat(steps.filter(s => s.kind === 'named')).forEach(s => { let n = byPath.get(s.path); while (n) { onRoute.add(n.p); n = n.parent; } });
   const readsAt = new Map(); // path -> [step numbers]
   reads.forEach(s => { if (!readsAt.has(s.path)) readsAt.set(s.path, []); readsAt.get(s.path).push(s.i); });
+  const readIx = new Map(reads.map((s, k) => [s.i, k + 1])); // step number -> position among reads; scans and misses take step numbers too, so the two are not the same
 
   let manual = new Map(); // folder path -> open?
   let mode = 'route';
@@ -338,12 +342,14 @@ svg { display: block; font-family: var(--body) }
       }
       const col = ROLE_C[n.r] || 'var(--line)';
       const nums = readsAt.get(n.p) || [];
-      const readNow = nums.some(i => i <= cur);
+      const readNow = nums.some(i => readIx.get(i) <= cur);
       const isNow = cur > 0 && shownReads[cur - 1] && shownReads[cur - 1].path === n.p;
       const kind = n.d ? 'dir' : n.r === 'more' ? 'more' : 'file';
       const cls = ['n', kind, n.r === 'file' ? 'plain' : '', readNow ? 'read' : '', named.has(n.p) && !readNow ? 'named' : '', isNow ? 'now' : '', (n.d && n.c && n.c.length) || nums.length ? 'toggle' : '', (reads.length && !on && !readNow && mode === 'route') ? 'dim' : ''].join(' ');
       const label = n.d && !it.open && n.p !== '.' ? n.n + '/' : n.n;
-      const sub = n.d ? (it.open ? '' : `${fmt(n.files)} files · ${fmt(n.t)} tok`) : (n.t ? `${fmt(n.t)} tok` : '');
+      // A read page shows loaded / whole, summed over every read of it up to this step, so a slice reads as a fraction of the brick.
+      const loaded = nums.filter(i => readIx.get(i) <= cur).reduce((a, i) => a + (reads[readIx.get(i) - 1].tokens || 0), 0);
+      const sub = n.d ? (it.open ? '' : `${fmt(n.files)} files · ${fmt(n.t)} tok`) : readNow ? `${fmt(loaded)} / ${fmt(n.t)} tok` : (n.t ? `${fmt(n.t)} tok` : '');
       const shape = kind === 'dir' ? FOLDER : kind === 'more' ? MORE(it.h) : FILE(it.h);
       const ty = kind === 'dir' ? [27, 37] : sub ? [17, 29] : [24];
       boxes.push(`<g class="${cls}" style="--c:${col}" data-p="${esc(n.p)}" transform="translate(${it.x - NODE_W / 2},${it.y})"><title>${esc(n.p)}${n.d ? '' : ' · ~' + fmt(n.t) + ' tokens'}</title>${shape}` +
@@ -391,7 +397,7 @@ svg { display: block; font-family: var(--body) }
       const cls = isRead ? (k === cur ? 'now' : k > cur ? 'future' : '') : (k > cur ? 'future' : '');
       const tag = isRead ? `<span class="tag ${s.layer}">${s.layer}</span>` : s.kind === 'named' ? `<span class="tag ${s.layer}">${s.layer}</span><span class="tag named">named</span>` : `<span class="tag ${s.kind}">${s.kind}</span>`;
       const miss = isRead && s.exists === false ? ' <span class="tag miss">missing</span>' : '';
-      return `<li class="${cls}" data-k="${k}" tabindex="0"><span class="num">${isRead ? s.i : '·'}</span><span class="path">${tag}${esc(s.path)}${miss}</span><span class="tok">${isRead ? '~' + fmt(s.tokens) : ''}</span><span class="why">${esc(s.why || '')}${s.via ? ' <em>(via ' + esc(s.via) + ')</em>' : ''}</span></li>`;
+      return `<li class="${cls}" data-k="${k}" tabindex="0"><span class="num">${isRead ? s.i : '·'}</span><span class="path">${tag}${esc(s.path)}${miss}</span><span class="tok" title="tokens loaded / whole file">${isRead ? used(s) : ''}</span><span class="why">${s.lines ? '<em>lines ' + s.lines[0] + '–' + s.lines[1] + '</em> · ' : ''}${esc(s.why || '')}${s.via ? ' <em>(via ' + esc(s.via) + ')</em>' : ''}</span></li>`;
     }).join('');
     $('steps').querySelectorAll('li[data-k]').forEach(li => { const go = () => { cur = +li.dataset.k; draw(); }; li.addEventListener('click', go); li.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); });
     const now = $('steps').querySelector('li.now'); if (now) now.scrollIntoView({ block: 'nearest' });
