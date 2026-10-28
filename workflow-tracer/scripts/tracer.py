@@ -186,8 +186,9 @@ def rel_to_root(args, p: str) -> str:
 
 def cmd_read(args):
     rel, path = rel_to_root(args, args.path)
-    exists = path.exists() and path.is_file()
-    size = path.stat().st_size if exists else 0
+    # A folder a contract points at exists too (a skill dir, a runs/ folder); it reads as zero bytes, zero tokens.
+    exists = path.exists()
+    size = path.stat().st_size if path.is_file() else 0
     step = {"kind": "named" if args.named else "read", "path": rel, "layer": args.layer, "why": args.why, "via": args.via,
             "exists": exists, "bytes": size, "tokens": 0 if args.named else tokens_of(path, size)}
     # --lines A-B: the walker opened a slice, so charge the slice. The whole-file size stays in "bytes" and on the
